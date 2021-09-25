@@ -9,60 +9,56 @@
     </head>
     <body>
 
-        <div class="w3-row">
-            <div class="w3-col w3-mobile w3-container w3-indigo"">
+        <header class="w3-row">
+            <section class="w3-col w3-mobile w3-container w3-indigo">
                 <h5>Teszt oldal</h5>
-            </div>
-        </div>
+            </section>
+        </header>
 
-        <div class="w3-row-padding">
-            <div class="w3-col w3-mobile s4 w3-container w3-display-middle" style="margin: 10px;">
-                <div class="w3-card-4">
+        <article class="w3-row-padding">
+            <section class="w3-col w3-mobile s4 w3-container w3-display-middle" style="margin: 10px;">
+                <section class="w3-card-4">
                     <img class="w3-center" id= "frame" src="" alt="A kamera nem elérhető" style="width: 100%;">
-                    <div class="w3-card4 w3-container w3-left">
-                    </div>
-                    <div class="w3-container w3-center">
+                    <section class="w3-card4 w3-container w3-left">
+                    </section>
+                    <aside class="w3-container w3-center">
                         <p>ESP32-Cam OV2640
                             <span class="w3-right" id="msglen" style="font-size: 8pt;">Msg len: 0</span>
                         </p>
-                    </div>
-                </div> 
-            </div>
-        </div>
-        <div class="w3-row">
-            <div class="w3-col w3-mobile w3-container w3-display-bottommiddle w3-indigo">
+                    </aside>
+                </section> 
+            </section>
+        </article>
+        <footer class="w3-row">
+            <section class="w3-col w3-mobile w3-container w3-display-bottommiddle w3-indigo">
                 <h5 class="w3-right" id="date"></h5>
-            </div>
-        </div>
+            </section>
+        </footer>
 
         <script>
             const img = document.getElementById("frame");
             const dateTxt = document.getElementById("date");
             const msglen = document.getElementById("msglen");
 
-            const dateObj = new Date();
-            const month = dateObj.getUTCMonth() + 1;
-            const day = dateObj.getUTCDate();
-            const year = dateObj.getUTCFullYear();
-
-            if(month < 10)
-            {
-                dateTxt.innerHTML = year + ".0" + month + "." + day+ ".";
+            const addZero = (act) => {
+                return act < 10 ? '0' + act  : act;
             }
-            else
-            {
-                dateTxt.innerHTML = year + "." + month + "." + day+ ".";
+
+            const updateTime = () => {
+                let d = new Date();
+                dateTxt.innerHTML = `${d.getFullYear()}.${addZero(d.getMonth() + 1)}.${addZero(d.getDate())} ${addZero(d.getHours())}:${addZero(d.getMinutes())}:${addZero(d.getSeconds())}`;
             }
 
             const WS_URL = 'ws:///192.168.1.75:8888';
             const url = "data:image/png;base64, ";
-            var msgl = 0
-            ;
+
+            setInterval(updateTime, 1000);
+
             const ws = new WebSocket(WS_URL);
             ws.onopen = () => console.log(`Connected to ${WS_URL}`);
                 ws.onmessage = message => {            
-                img.src =url+ message.data;
-                msgl = 4*Math.ceil(message.data.length / 3.0);
+                img.src =url+ message.data; 
+                let msgl = 4*Math.ceil(message.data.length / 3.0);
                 msglen.innerHTML = "Msg len: " + msgl + "B";
                 }
         </script>
