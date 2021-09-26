@@ -4,39 +4,58 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">              
         <link rel="stylesheet" 
         href="https://www.w3schools.com/w3css/4/w3.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="style.css">
 
 
     </head>
     <body>
 
-        <header class="w3-row">
-            <section class="w3-col w3-mobile w3-container w3-indigo">
-                <h5>Teszt oldal</h5>
-            </section>
+
+        <header>
+            <nav class="w3-bar w3-mobile w3-black">         
+                <img class="navimg" src="mars2020_2.png" alt="">
+                <span class="w3-mobile">
+                    <a class="w3-button w3-mobile w3-hover-red"><i class="fa fa-w fa-search"></i> Keresés</a>
+                </span> 
+            </nav>
         </header>
 
-        <article class="w3-row-padding">
-            <section class="w3-col w3-mobile s4 w3-container w3-display-middle" style="margin: 10px;">
-                <section class="w3-card-4">
+        <main class="w3-row w3-display-container main w3-mobile">
+            <section class="w3-half w3-mobile w3-container">
+                <div class="w3-card-4">
                     <img class="w3-center" id= "frame" src="" alt="A kamera nem elérhető" style="width: 100%;">
-                    <section class="w3-card4 w3-container w3-left">
-                    </section>
-                    <aside class="w3-container w3-center">
-                        <p>ESP32-Cam OV2640
+                    <div class="w3-container w3-center">
+                        <p>
+                            ESP32-Cam OV2640
                             <span class="w3-right" id="msglen" style="font-size: 8pt;">Msg len: 0</span>
                         </p>
-                    </aside>
-                </section> 
+                    </div>
+                </div> 
             </section>
-        </article>
-        <footer class="w3-row">
-            <section class="w3-col w3-mobile w3-container w3-display-bottommiddle w3-indigo">
-                <h5 class="w3-right" id="date"></h5>
+            <section class="w3-half w3-mobile w3-container">
+                <div class="w3-card-4">
+                    <img class="w3-center" id= "frame2" src="" alt="A kamera nem elérhető" style="width: 100%;">
+                    <div class="w3-container w3-center">
+                        <p>
+                            ESP32-Cam OV2640
+                            <span class="w3-right" id="msglen2" style="font-size: 8pt;">Msg len: 0</span>
+                        </p>
+                    </div>
+                </div> 
             </section>
+
+        </main>
+     
+        <footer class = "w3-container w3-black">
+            <span class="w3-mobile w3-right">
+                <h5 class="w3-mobile w3-hover-red" id="date"></h5>
+            </span>
         </footer>
 
         <script>
             const img = document.getElementById("frame");
+            const img2 = document.getElementById("frame2");
             const dateTxt = document.getElementById("date");
             const msglen = document.getElementById("msglen");
 
@@ -58,6 +77,7 @@
             ws.onopen = () => console.log(`Connected to ${WS_URL}`);
                 ws.onmessage = message => {            
                 img.src =url+ message.data; 
+                img2.src =url+ message.data; 
                 let msgl = 4*Math.ceil(message.data.length / 3.0);
                 msglen.innerHTML = "Msg len: " + msgl + "B";
                 }
