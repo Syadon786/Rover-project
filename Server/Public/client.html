@@ -12,16 +12,16 @@
     <body>
 
 
-        <header>
+        <header id="header">
             <nav class="w3-bar w3-mobile w3-black">         
                 <img class="navimg" src="mars2020_2.png" alt="">
                 <span class="w3-mobile">
-                    <a class="w3-button w3-mobile w3-hover-red"><i class="fa fa-w fa-search"></i> Keresés</a>
+                    <a class="w3-button w3-mobile w3-hover-red" href="#cams"><i class="fa fa-w fa-video-camera"></i> Kamerák</a>
                 </span> 
             </nav>
         </header>
 
-        <main class="w3-row w3-display-container main w3-mobile">
+        <main id="cams" class="w3-row w3-display-container main w3-mobile">
             <section class="w3-half w3-mobile w3-container">
                 <div class="w3-card-4">
                     <img class="w3-center" id= "frame" src="" alt="A kamera nem elérhető" style="width: 100%;">
@@ -46,7 +46,7 @@
             </section>
 
         </main>
-     
+  
         <footer class = "w3-container w3-black">
             <span class="w3-mobile w3-right">
                 <h5 class="w3-mobile w3-hover-red" id="date"></h5>
@@ -58,9 +58,21 @@
             const img2 = document.getElementById("frame2");
             const dateTxt = document.getElementById("date");
             const msglen = document.getElementById("msglen");
+            const navbar = document.getElementById("header");
 
             const addZero = (act) => {
                 return act < 10 ? '0' + act  : act;
+            }
+
+            window.onscroll = () => {nbScroll()};
+            let sticky = navbar.offsetTop;
+
+            const nbScroll = () => {
+                if (window.pageYOffset > sticky) {
+                    header.classList.add("sticky");
+                } else {
+                    header.classList.remove("sticky");
+                }
             }
 
             const updateTime = () => {
@@ -84,4 +96,3 @@
         </script>
     </body>
 </html>
-
