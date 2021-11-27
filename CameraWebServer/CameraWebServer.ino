@@ -6,9 +6,9 @@
 
 #include "camera_pins.h"
 
-const char* ssid = "Skynet 2.4GHz";
-const char* password = "vah15umg5ak8";
-const char* websocket_server_host = "192.168.1.75";
+const char* ssid = "RoverNet";
+const char* password = "Phobos5760";
+const char* websocket_server_host = "10.0.0.1";
 const uint16_t websocket_server_port = 8888;
 
 using namespace websockets;
@@ -20,6 +20,7 @@ void setup() {
   Serial.println();
 
   camera_config_t config;
+
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -38,15 +39,16 @@ void setup() {
   config.pin_sscb_scl = SIOC_GPIO_NUM;
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
-  config.xclk_freq_hz = 10000000;
+  config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
   
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
   if(psramFound()){
-    config.frame_size = FRAMESIZE_VGA;
-    config.jpeg_quality = 20; //40
+    config.frame_size = FRAMESIZE_SVGA;
+    config.jpeg_quality = 10; 
     config.fb_count = 2;
+    Serial.println("It has PSRAM");
   } else {
     config.frame_size = FRAMESIZE_SVGA;
     config.jpeg_quality = 12;
@@ -91,5 +93,5 @@ void loop() {
   }
   client.sendBinary((const char*)fb->buf, fb->len);
   esp_camera_fb_return(fb);
-  delay(20); //extra
+  delay(30); //extra
 }

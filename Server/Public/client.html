@@ -1,11 +1,11 @@
 <html>
     <head>
-        <title>Client</title> 
+        <title>Rover Monitoring</title> 
         <meta name="viewport" content="width=device-width, initial-scale=1">              
         <link rel="stylesheet" 
-        href="https://www.w3schools.com/w3css/4/w3.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        href="w3.css">
         <link rel="stylesheet" href="style.css">
+        <link rel="shortcut icon" href="mars2020_2.png" type="image/x-icon">
 
 
     </head>
@@ -16,7 +16,7 @@
             <nav class="w3-bar w3-mobile w3-black">         
                 <img class="navimg" src="mars2020_2.png" alt="">
                 <span class="w3-mobile">
-                    <a class="w3-button w3-mobile w3-hover-red" href="#cams"><i class="fa fa-w fa-video-camera"></i> Kamerák</a>
+                    <a class="w3-button w3-mobile w3-hover-red" href="#cams">Kamerák</a>
                 </span> 
             </nav>
         </header>
@@ -80,7 +80,7 @@
                 dateTxt.innerHTML = `${d.getFullYear()}.${addZero(d.getMonth() + 1)}.${addZero(d.getDate())} ${addZero(d.getHours())}:${addZero(d.getMinutes())}:${addZero(d.getSeconds())}`;
             }
 
-            const WS_URL = 'ws:///192.168.1.75:8888';
+            const WS_URL = 'ws:///10.0.0.1:8888';
             const url = "data:image/png;base64, ";
 
             setInterval(updateTime, 1000);

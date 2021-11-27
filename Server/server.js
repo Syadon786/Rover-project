@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require('express');
 const WebSocket = require('ws');
+const Gpio = require("onoff").Gpio;
 const app = express();
 
 const WS_PORT = 8888;
@@ -15,14 +16,14 @@ app.use(express.static(publicDir));
 
 
 wsServer.on('connection', (ws, req) => {
-    console.log(`Connected`);
-    connectedClients.push(ws);
-
+    ws.id = req.socket.remoteAddress.replace(/^.*:/, '');
+    console.log(`${ws.id} has connected`);
+    connectedClients.push(ws); 
     ws.on('message', data => {
         connectedClients.forEach((ws, i) => {
             if(ws.readyState === ws.OPEN) {             
                 let base64data = Buffer.from(data).toString('base64');
-                ws.send(base64data);           
+                ws.send(base64data);         
             } 
             else
             {
