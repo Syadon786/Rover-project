@@ -80,16 +80,21 @@
                 dateTxt.innerHTML = `${d.getFullYear()}.${addZero(d.getMonth() + 1)}.${addZero(d.getDate())} ${addZero(d.getHours())}:${addZero(d.getMinutes())}:${addZero(d.getSeconds())}`;
             }
 
-            const WS_URL = 'ws:///10.0.0.1:8888';
+            const WS_URL = 'ws://10.0.0.1:8888';
             const url = "data:image/png;base64, ";
 
             setInterval(updateTime, 1000);
 
             const ws = new WebSocket(WS_URL);
             ws.onopen = () => console.log(`Connected to ${WS_URL}`);
-                ws.onmessage = message => {            
-                img.src =url+ message.data; 
-                img2.src =url+ message.data; 
+                ws.onmessage = message => {  
+                const temp = message.data.split("#");
+                if(temp[0] == "1") {
+                    img.src = url + temp[1];
+                }         
+                else {
+                    img2.src = url + temp[1];
+                }
                 let msgl = 4*Math.ceil(message.data.length / 3.0);
                 msglen.innerHTML = "Msg len: " + msgl + "B";
                 }
