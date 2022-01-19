@@ -45,8 +45,8 @@ void setup() {
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
   if(psramFound()){
-    config.frame_size = FRAMESIZE_SVGA;
-    config.jpeg_quality = 10; 
+    config.frame_size = FRAMESIZE_VGA;
+    config.jpeg_quality = 14; 
     config.fb_count = 2;
     Serial.println("It has PSRAM");
   } else {
@@ -55,28 +55,16 @@ void setup() {
     config.fb_count = 1;
   }
 
-
-
   // camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
     Serial.printf("Camera init failed with error 0x%x", err);
     return;
   }
-
   
+  WiFi.onEvent(wifiConnected,SYSTEM_EVENT_STA_CONNECTED);
+  WiFi.onEvent(wifiReconnect, SYSTEM_EVENT_STA_DISCONNECTED); 
   WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  while(!client.connect(websocket_server_host, websocket_server_port, "/")) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("Websocket Connected!");
 }
 
 void loop() {
@@ -93,5 +81,25 @@ void loop() {
   }
   client.sendBinary((const char*)fb->buf, fb->len);
   esp_camera_fb_return(fb);
-  delay(30); //extra
+  delay(50); //extra
+}
+
+void wifiConnected(WiFiEvent_t event, WiFiEventInfo_t info){
+  Serial.println("Successfully connected to Access Point");
+  webSocketConnect();
+}
+
+void wifiReconnect(WiFiEvent_t event, WiFiEventInfo_t info){
+  Serial.println("Disconnected from WIFI access point");
+  Serial.print("WiFi lost connection. Reason: ");
+  Serial.println(info.disconnected.reason);
+  Serial.println("Reconnecting...");
+  WiFi.begin(ssid, password);
+}
+void webSocketConnect(){
+   while(!client.connect(websocket_server_host, websocket_server_port, "/")) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Websocket Connected!");
 }
