@@ -22,5 +22,18 @@ internal class EchoWebSocketListener(
 
     }
 
-    
+    override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+        webSocket.close(NORMAL_CLOSURE_STATUS, null)
+        ping("Closing : $code / $reason")
+        closing()
+    }
+
+    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        ping("Error : " + t.message)
+        closing()
+    }
+
+    companion object {
+        const val NORMAL_CLOSURE_STATUS = 1000
+    }    
 }
