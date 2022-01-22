@@ -53,6 +53,74 @@ class MainActivity : AppCompatActivity() {
         allstop = 999
          */
         
+        btnFwd.run {
+            setOnTouchListener { v, event ->
+                when (event?.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        changeBtnState(true, btnDwn, btnLft, btnRght)
+                        ws?.apply {
+                            val message : String = "0${seekSpeed.progress}"
+                            send(message)
+                        } ?: ping("Error: Restart the App to reconnect")
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        changeBtnState(false, btnDwn, btnLft, btnRght)
+                        ws?.apply {
+                            val message : String = "999"
+                            send(message)
+                        } ?: ping("Error: Restart the App to reconnect")
+                    }
+                }
+                v?.onTouchEvent(event) != false
+            }
+        }
+
+
+        btnDwn.run {
+            setOnTouchListener { v, event ->
+                when (event?.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        changeBtnState(true, btnFwd, btnLft, btnRght)
+                        ws?.apply {
+                            val message : String = "2${seekSpeed.progress}"
+                            send(message)
+                        } ?: ping("Error: Restart the App to reconnect")
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        changeBtnState(false, btnFwd, btnLft, btnRght)
+                        ws?.apply {
+                            val message : String = "999"
+                            send(message)
+                        } ?: ping("Error: Restart the App to reconnect")
+                    }
+                }
+                v?.onTouchEvent(event) != false
+            }
+        }
+
+
+        btnRght.run {
+            setOnTouchListener { v, event ->
+                when (event?.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        changeBtnState(true, btnDwn, btnLft, btnFwd)
+                        ws?.apply {
+                            val message : String = "1${seekSpeed.progress}"
+                            send(message)
+                        } ?: ping("Error: Restart the App to reconnect")
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        changeBtnState(false, btnDwn, btnLft, btnFwd)
+                        ws?.apply {
+                            val message : String = "999"
+                            send(message)
+                        } ?: ping("Error: Restart the App to reconnect")
+                    }
+                }
+                v?.onTouchEvent(event) != false
+            }
+        }
+        
 }
 
 
