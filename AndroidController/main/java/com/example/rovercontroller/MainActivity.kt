@@ -121,6 +121,41 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
+        btnLft.run {
+            setOnTouchListener { v, event ->
+                when (event?.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        changeBtnState(true, btnDwn, btnRght, btnFwd)
+                        ws?.apply {
+                            val message : String = "3${seekSpeed.progress}"
+                            send(message)
+                        } ?: ping("Error: Restart the App to reconnect")
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        changeBtnState(false, btnDwn, btnRght, btnFwd)
+                        ws?.apply {
+                            val message : String = "999"
+                            send(message)
+                        } ?: ping("Error: Restart the App to reconnect")
+                    }
+                }
+                v?.onTouchEvent(event) != false
+            }
+        }
+
+        seekSpeed.max = maxSpeed
+        seekSpeed.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            @SuppressLint("SetTextI18n")
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                currentPercent = (seekSpeed.progress.toDouble() / maxSpeed) * 100
+                currentPercent = floor(currentPercent)
+                tvSpeed.text = "${currentPercent}%"
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+
+            }
 }
 
 
