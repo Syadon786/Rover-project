@@ -17,8 +17,6 @@ let monitoring = null;
 let cam = null;
 let process = null;
 
-let counter = 0;
-
 var publicDir = require('path').join(__dirname,'/Public');
 app.use(express.static(publicDir));
 
@@ -51,22 +49,23 @@ wsServer.on('connection', (ws, req) => {
             console.log(`${ws.id}: ${data}`);    
         if(ws.id == "10.0.0.10") {
             let base64data = Buffer.from(data).toString('base64');
-            counter++;
             if(monitoring !== null && monitoring !== undefined )
             {             
                
-                if(monitoring.readyState === monitoring.OPEN)
+                if(monitoring.readyState === monitoring.OPEN && data.length > 5000 )
                 {
                     
                     monitoring.send("1#" + base64data);         
                 }
+                else {
+                    monitoring.send("3#" + data);
+                }
                 
             }
-            if(counter >= 5 && process !== null && process !== undefined){
+            if(process !== null && process !== undefined && data.length > 5000){
                 if(process.readyState === process.OPEN)
                 {
                     process.send(base64data);
-                    counter = 0;
                 }
             }
         }      

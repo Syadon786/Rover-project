@@ -28,18 +28,19 @@
                     <div class="w3-container w3-center">
                         <p>
                             ESP32-Cam OV2640
-                            <span class="w3-right" id="msglen" style="font-size: 8pt;">Msg len: 0</span>
+                            <span class="w3-right" id="msglen" style="font-size: 8pt;">Msg len: 0</span><br/>
+                            <span class = "w3-right" id="msgdist" style="font-size: 8pt;">Distance: 0 cm</span>           
                         </p>
                     </div>
                 </div> 
             </section>
+
             <section class="w3-half w3-mobile w3-container">
                 <div class="w3-card-4">
                     <img class="w3-center" id= "frame2" src="" alt="A kamera nem elérhető" style="width: 100%;">
                     <div class="w3-container w3-center">
                         <p>
-                            ESP32-Cam OV2640
-                            <span class="w3-right" id="msglen2" style="font-size: 8pt;">Msg len: 0</span>
+                            Processed data
                         </p>
                     </div>
                 </div> 
@@ -59,6 +60,7 @@
             const dateTxt = document.getElementById("date");
             const msglen = document.getElementById("msglen");
             const navbar = document.getElementById("header");
+            const distance = document.getElementById("msgdist");
 
             const addZero = (act) => {
                 return act < 10 ? '0' + act  : act;
@@ -88,15 +90,20 @@
             const ws = new WebSocket(WS_URL);
             ws.onopen = () => console.log(`Connected to ${WS_URL}`);
                 ws.onmessage = message => {  
+                let msgl = 0;
                 const temp = message.data.split("#");
                 if(temp[0] == "1") {
                     img.src = url + temp[1];
+                    msgl = 4*Math.ceil(message.data.length / 3.0);
+                    msglen.innerHTML = "Msg len: " + msgl + "B";
                 }         
-                else {
+                else if(temp[0] == "2"){
                     img2.src = url + temp[1];
                 }
-                let msgl = 4*Math.ceil(message.data.length / 3.0);
-                msglen.innerHTML = "Msg len: " + msgl + "B";
+                else {
+                    distance.innerText = `Distance: ${temp[1]}cm`;
+                }
+                
                 }
         </script>
     </body>
