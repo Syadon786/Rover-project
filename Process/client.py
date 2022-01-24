@@ -1,83 +1,88 @@
-#pip install websockets
-#pip install pillow 
+# pip3 install websockets
+# pip3 install pillow
+# pip3 install opencv3
 
 import websockets as wb
 import cv2 as cv
 import numpy as np
 import asyncio
-import PIL.Image as Image
 import io
+import PIL.Image as Image
 import base64
 import threading
-import keyboard
 from time import sleep
 
-#Saját
 import config
 
+
 async def listen():
-    url = "ws://192.168.1.75:8888";
-    counter = 0
-    async with wb.connect(url) as websockets: 
-                    while config.processing:
-                        if(counter >= 2):
-                            counter = 0
-                        else:
-                            msg = await websockets.recv()
-                            counter += 1
-                            print("Kaptam")
-                            await decodeByteStream(msg)
+    url = "ws://10.0.0.1:8888"
+    async with wb.connect(url) as websockets:
+        while True:
+            msg = await websockets.recv()
+            await decodeByteStream(msg)
+            await send(websockets)
+
 
 async def decodeByteStream(data):
-            b64 = base64.b64decode(data)
-            buf = io.BytesIO(b64)
-            img = Image.open(buf)
-            print("Dekódoltam")
-            config.images.append(cv.cvtColor(np.array(img), cv.COLOR_RGB2BGR))
+    b64 = base64.b64decode(data)
+    buf = io.BytesIO(b64)
+    img = cv.cvtColor(np.array(Image.open(buf)), cv.COLOR_RGB2BGR)
+    config.images.append(img)
+
+
+async def send(websocket):
+    if (len(config.processed) > 0):
+        img = config.processed.pop(0)
+        if (len(config.processed) > 10):
+            config.processed = []
+        _, im_arr = cv.imencode('.jpg', img)
+        im_bytes = im_arr.tobytes()
+        await websocket.send(im_bytes)
+
 
 def processImage():
-    config.haar_cascade = cv.CascadeClassifier('haarcascade_frontalface_default.xml')
-    while config.processing:
-        if(len(config.images) > 0):
-            print(f"Feldolgoztam a képet")
-           
-           #Remove Images
+    face_cascade = cv.CascadeClassifier('haarcascade_frontalface_default.xml')
+    stop_cascade = cv.CascadeClassifier("StopSign_HAAR_Cascade.xml")
+    yield_cascade = cv.CascadeClassifier("YieldSign_HAAR_Cascade.xml")
+    while True:
+        if (len(config.images) > 0):
             img = config.images.pop(0)
-            if(len(config.images) > 10):
-                config.images.remove(config.images[0])
-                config.images.remove(config.images[0])
+            if (len(config.images) > 10):
+                config.images = []
+            gray = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
+            faces_rect = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3, minSize=(100, 100))
+            stop_rect = stop_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4)
+            yield_rect = yield_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4)
 
-            gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY) 
-            faces_rect = config.haar_cascade.detectMultiScale(gray, scaleFactor = 1.1, minNeighbors = 3, minSize = (100, 100))
-
-            if(len(faces_rect) > 0):
-                for (x,y,w,h) in faces_rect:
-                    cv.rectangle(img, (x,y), (x+w, y+h), (0,255,0), thickness = 2)    
-
-            cv.imshow('Frame', img)
+            if (len(faces_rect) > 0):
+                for (x, y, w, h) in faces_rect:
+                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), thickness=2)
+            if (len(stop_rect) > 0):
+                for (x, y, w, h) in stop_rect:
+                    cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                    cv.putText(img, "Stop", (x, y - 10),
+                               cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 4)
+            if (len(yield_rect) > 0):
+                for (x, y, w, h) in yield_rect:
+                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                    cv.putText(img, "Yield", (x, y - 10),
+                               cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 4)
+            config.processed.append(img)
             cv.waitKey(20)
 
-def quitPrg():
-    while config.processing:
-        if keyboard.is_pressed('q'):
-            config.processing = False
-            sleep(300)
-            config.images = []
-            cv.destroyAllWindows()
 
-
-def startThreads(processImage, quitPrg):
-    thread = threading.Thread(target= processImage)
+def startThreads(processImage):
+    thread = threading.Thread(target=processImage)
     thread.start()
-    thread2 = threading.Thread(target = quitPrg)
-    thread2.start()
+
 
 def main():
-    startThreads(processImage, quitPrg)
+    startThreads(processImage)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(listen())
     loop.close()
-    print("Ended")
+
 
 if __name__ == "__main__":
     main()

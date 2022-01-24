@@ -11,13 +11,17 @@ const char* password = "Phobos5760";
 const char* websocket_server_host = "10.0.0.1";
 const uint16_t websocket_server_port = 8888;
 
+const byte trig_pin = 13;
+const byte echo_pin = 15;
+long duration;
+int distance;
+
 using namespace websockets;
 WebsocketsClient client;
 
 void setup() {
-  Serial.begin(115200);
-  Serial.setDebugOutput(true);
-  Serial.println();
+  pinMode(trig_pin, OUTPUT);
+  pinMode(echo_pin, INPUT);
 
   camera_config_t config;
 
@@ -42,56 +46,67 @@ void setup() {
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
   
-  // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
-  //                      for larger pre-allocated frame buffer.
   if(psramFound()){
-    config.frame_size = FRAMESIZE_SVGA;
-    config.jpeg_quality = 10; 
+    config.frame_size = FRAMESIZE_VGA;
+    config.jpeg_quality = 14; 
     config.fb_count = 2;
-    Serial.println("It has PSRAM");
   } else {
-    config.frame_size = FRAMESIZE_SVGA;
-    config.jpeg_quality = 12;
+    config.frame_size = FRAMESIZE_VGA;
+    config.jpeg_quality = 20;
     config.fb_count = 1;
   }
-
-
 
   // camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
-    Serial.printf("Camera init failed with error 0x%x", err);
     return;
   }
-
   
+  WiFi.onEvent(wifiConnected,SYSTEM_EVENT_STA_CONNECTED);
+  WiFi.onEvent(wifiReconnect, SYSTEM_EVENT_STA_DISCONNECTED); 
   WiFi.begin(ssid, password);
+}
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
+int readSensor() {
+      digitalWrite(trig_pin, LOW);
+      delayMicroseconds(2);
+     
+      digitalWrite(trig_pin, HIGH);
+      delayMicroseconds(10);
+      digitalWrite(trig_pin, LOW);
+      
+      duration = pulseIn(echo_pin, HIGH);
+      distance = duration * 0.034 / 2; //340m/s, s = t / v
+      return distance;
+ }
 
-  while(!client.connect(websocket_server_host, websocket_server_port, "/")) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("Websocket Connected!");
+
+void captureAndSend() {
+        camera_fb_t *fb = esp_camera_fb_get();
+        if(!fb)
+        {
+          esp_camera_fb_return(fb);
+        }
+        client.sendBinary((const char*)fb->buf, fb->len);
+        String msg = String(readSensor() , DEC);
+        client.send(msg);
+        esp_camera_fb_return(fb);
+        delay(30); //extra
 }
 
 void loop() {
-  camera_fb_t *fb = esp_camera_fb_get();
-  if(!fb)
-  {
-    Serial.println("Camera capture fail!");
-    esp_camera_fb_return(fb);
-    return;
+   captureAndSend();
+}
+
+void wifiConnected(WiFiEvent_t event, WiFiEventInfo_t info){
+  webSocketConnect();
+}
+
+void wifiReconnect(WiFiEvent_t event, WiFiEventInfo_t info){
+  WiFi.begin(ssid, password);
+}
+void webSocketConnect(){
+   while(!client.connect(websocket_server_host, websocket_server_port, "/")) {
+    delay(500);
   }
-  if(fb->format != PIXFORMAT_JPEG)
-  {
-    Serial.println("NON Jpeg data not implemented!");
-  }
-  client.sendBinary((const char*)fb->buf, fb->len);
-  esp_camera_fb_return(fb);
-  delay(30); //extra
 }
