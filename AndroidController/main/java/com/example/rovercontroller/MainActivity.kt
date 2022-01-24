@@ -156,6 +156,101 @@ class MainActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(p0: SeekBar?) {
 
             }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+                if(isGoing)
+                {
+                    ws?.apply {
+                        val message : String = "5${seekSpeed.progress}"
+                        send(message)
+                    } ?: ping("Error: Restart the App to reconnect")
+                }
+            }
+        })
+
+        seekHH.max = maxAngle
+        seekHH.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+                ws?.apply {
+                    val message : String = "8${seekHH.progress}"
+                    send(message)
+                } ?: ping("Error: Restart the App to reconnect")
+            }
+        })
+
+        seekHV.max = maxAngle
+        seekHV.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+                ws?.apply {
+                    val message : String = "7${seekHV.progress}"
+                    send(message)
+                } ?: ping("Error: Restart the App to reconnect")
+            }
+        })
+
+    }
+
+
+
+
+    override fun onResume() {
+        super.onResume()
+        start()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stop()
+    }
+
+    private fun start() {
+        val request: Request = Request.Builder().url("ws://10.0.0.1:8888/").build()
+        val listener = EchoWebSocketListener(this::ping) { ws = null }
+        ws = client.newWebSocket(request, listener)
+    }
+
+    private fun stop() {
+        ws?.apply {
+            val message : String = "999"
+            send(message)
+        } ?: ping("Error: Restart the App to reconnect")
+        ws?.close(NORMAL_CLOSURE_STATUS, "Goodbye !")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        client.dispatcher.executorService.shutdown()
+    }
+
+    private fun changeBtnState(state: Boolean, btn1 : Button, btn2: Button, btn3 : Button)
+    {
+        isGoing = state
+        btn1.isEnabled = !state
+        btn2.isEnabled = !state
+        btn3.isEnabled = !state
+    }
+
+    private fun ping(txt: String) {
+        runOnUiThread {
+            Toast.makeText(this, txt, Toast.LENGTH_SHORT).show()
+        }
+    }
 }
-
-
