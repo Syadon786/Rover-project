@@ -29,8 +29,7 @@ void setup() {
 
   arrayLength = sizeof receivedBytes / sizeof receivedBytes[0];
 
-  ESP32PWM::allocateTimer(0);
-  ESP32PWM::allocateTimer(1);
+
   ESP32PWM::allocateTimer(2);
   ESP32PWM::allocateTimer(3);
   servoOne.setPeriodHertz(50);
@@ -51,6 +50,8 @@ void setup() {
   ledcAttachPin(LBPWM, leftBackward);
 
   WiFi.mode(WIFI_OFF);
+  servoOne.write(90);
+  servoTwo.write(90);
 }
 
 void loop() {
@@ -160,14 +161,16 @@ void turnLeft()
   ledcWrite(leftBackward, dutyCycle);
 }
 
-void setServo(Servo& servo, byte& currentPos) 
+void setServo(Servo& servo, byte& pos) 
 {
-  if((currentPos != dutyCycle) && (dutyCycle >= 0) && (dutyCycle <= 180))
+  if((pos != dutyCycle) && (dutyCycle >= 0) && (dutyCycle <= 180))
   {   
     servo.write(dutyCycle);
-    currentPos = dutyCycle;
+    pos = dutyCycle;
   }
 }
+
+
 
 
 bool isStopCode()
