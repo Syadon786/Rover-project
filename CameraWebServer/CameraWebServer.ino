@@ -76,7 +76,7 @@ int readSensor() {
       digitalWrite(trig_pin, LOW);
       
       duration = pulseIn(echo_pin, HIGH);
-      distance = duration * 0.034 / 2; //340m/s, s = t / v
+      distance = duration * 0.034 / 2; //340m/s, s = t * v
       return distance;
  }
 
